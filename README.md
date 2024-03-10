@@ -30,7 +30,7 @@ Where:
 Example:
 
 ```
-./tcp_syn_flooder example.com 80 1000
+go run main.go example.com 80 1000
 ```
 
 This will attempt to send 1000 TCP SYN packets to `example.com` on port 80.
