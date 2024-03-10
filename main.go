@@ -73,7 +73,7 @@ func main() {
 		err = handle.WritePacketData(buf.Bytes())
 		if err != nil {
 			// Error during sending
-			log.Fatalf("Error during serialization: %v", err)
+			log.Fatalf("Error during sending: %v", err)
 		}
 	}
 
