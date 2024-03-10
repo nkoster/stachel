@@ -52,5 +52,5 @@ The tool performs the following steps:
 
 ## Disclaimer
 
-The authors of this tool disclaim any liability for misuse or damages caused by this tool.
+The author of this tool disclaim any liability for misuse or damages caused by this tool.
 Users assume all responsibility and risk associated with the use of this tool.
