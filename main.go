@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if len(os.Args) != 5 {
-		log.Fatalf("Usage: %s <interface> <host> <port> <packets>", os.Args[0])
+		log.Fatalf("Usage: %s <host> <port> <packets>", os.Args[0])
 	}
 
 	host := os.Args[2]
